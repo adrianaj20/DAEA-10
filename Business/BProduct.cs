@@ -16,6 +16,12 @@ namespace Business
             List<Product> allProducts = dataProduct.GetAllP();
             return allProducts;
         }
+        public Product GetProductById(int productId)
+        {
+            DProduct dataProduct = new DProduct();
+            Product product = dataProduct.GetAllP().FirstOrDefault(c => c.ProductId == productId);
+            return product;
+        }
         public void InsertProduct(Product product)
         {
             DProduct dataProduct = new DProduct();

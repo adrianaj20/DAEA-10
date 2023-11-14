@@ -31,9 +31,7 @@ namespace Business
         public Customer GetCustomerById(int customerId)
         {
             DCustomer dataCustomer = new DCustomer();
-            List<Customer> allCustomers = dataCustomer.GetAll();
-
-            Customer customer = allCustomers.FirstOrDefault(c => c.CustomerId == customerId);
+            Customer customer = dataCustomer.GetAll().FirstOrDefault(c => c.CustomerId == customerId);
             return customer;
         }
 

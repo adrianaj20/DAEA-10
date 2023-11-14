@@ -98,7 +98,7 @@ namespace Data
 
                     command.ExecuteNonQuery();
                 }
-                connection.Close();
+                //connection.Close();
             }
         }
     }

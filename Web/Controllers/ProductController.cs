@@ -1,4 +1,5 @@
 ﻿using Business;
+using Data;
 using Entity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,8 @@ namespace Web.Controllers
                 ProductId = x.ProductId,
                 Name = x.Name,
                 Price = x.Price,
-                Stock = x.Stock
+                Stock = x.Stock,
+                Active = x.Active
             }).ToList();
             return View(models);
         }
@@ -32,7 +34,24 @@ namespace Web.Controllers
         // GET: ProductController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var bProduct = new BProduct();
+            var product = bProduct.GetProductById(id);
+
+            if (product == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var productModel = new ProductModel
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                Price = product.Price,
+                Stock = product.Stock,
+                Active = product.Active
+            };
+
+            return View(productModel);
         }
 
         // GET: ProductController/Create
@@ -44,58 +63,95 @@ namespace Web.Controllers
         // POST: ProductController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Product product)
         {
-            try
+            if (ModelState.IsValid)
             {
+                BProduct dataProduct = new BProduct();
+                dataProduct.InsertProduct(product);
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
+            return View(product);
         }
 
         // GET: ProductController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var bProduct = new BProduct();
+            var product = bProduct.GetProductById(id);
+
+            if (product == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var productModel = new ProductModel
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                Price = product.Price,
+                Stock = product.Stock,
+                Active = product.Active
+            };
+
+            return View(productModel);
         }
 
         // POST: ProductController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, ProductModel productModel)
         {
-            try
+            if (ModelState.IsValid)
             {
+                BProduct bProduct = new BProduct();
+                var existingCustomer = bProduct.GetProductById(id);
+
+                if (existingCustomer == null)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                existingCustomer.Name = productModel.Name;
+                existingCustomer.Price = productModel.Price;
+                existingCustomer.Stock = productModel.Stock;
+                existingCustomer.Active = productModel.Active;
+
+                bProduct.UpdateProduct(existingCustomer);
+
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
+            return View(productModel);
         }
 
         // GET: ProductController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var bProduct = new BProduct();
+            var product = bProduct.GetProductById(id);
+            if (product == null)
+                return RedirectToAction("Index");
+            var productModel = new ProductModel
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                Price = product.Price,
+                Stock = product.Stock,
+                Active = product.Active
+            };
+
+            return View(productModel);
         }
 
         // POST: ProductController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult DeleteConfirmed(int productId)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            BProduct bProduct = new BProduct();
+            bProduct.DeleteProduct(productId);
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

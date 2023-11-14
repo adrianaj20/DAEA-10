@@ -1,5 +1,4 @@
 ﻿using Business;
-using Data;
 using Entity;
 using Microsoft.AspNetCore.Mvc;
 using Web.Models;
@@ -35,8 +34,26 @@ namespace Web.Controllers
         // GET: CustomerController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var bCustomer = new BCustomer();
+            var customer = bCustomer.GetCustomerById(id);
+
+            if (customer == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var customerModel = new CustomerModel
+            {
+                CustomerId = customer.CustomerId,
+                Name = customer.Name,
+                Address = customer.Address,
+                Phone = customer.Phone,
+                Active = customer.Active
+            };
+
+            return View(customerModel);
         }
+
 
         // GET: CustomerController/Create
         public ActionResult Create()
@@ -51,7 +68,7 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                DCustomer dataCustomer = new DCustomer();
+                BCustomer dataCustomer = new BCustomer();
                 dataCustomer.InsertCustomer(customer);
                 return RedirectToAction(nameof(Index));
             }
@@ -62,83 +79,81 @@ namespace Web.Controllers
         // GET: CustomerController/Edit/5
         public ActionResult Edit(int id)
         {
-            BCustomer bCustomer = new BCustomer();
-            Customer customer = bCustomer.GetCustomerById(id);
+            var bCustomer = new BCustomer();
+            var customer = bCustomer.GetCustomerById(id);
 
-            if (customer != null)
+            if (customer == null)
             {
-                CustomerModel model = new CustomerModel
-                {
-                    CustomerId = customer.CustomerId,
-                    Name = customer.Name,
-                    Address = customer.Address,
-                    Phone = customer.Phone,
-                    Active = customer.Active
-                };
+                return RedirectToAction("Index");
+            }
 
-                return View(model);
-            }
-            else
+            var customerModel = new CustomerModel
             {
-                return NotFound();
-            }
+                CustomerId = customer.CustomerId,
+                Name = customer.Name,
+                Address = customer.Address,
+                Phone = customer.Phone,
+                Active = customer.Active
+            };
+
+            return View(customerModel);
         }
 
         // POST: CustomerController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, CustomerModel model)
+        public ActionResult Edit(int id, CustomerModel customerModel)
         {
             if (ModelState.IsValid)
             {
                 BCustomer bCustomer = new BCustomer();
-                Customer customer = new Customer
-                {
-                    CustomerId = model.CustomerId,
-                    Name = model.Name,
-                    Address = model.Address,
-                    Phone = model.Phone,
-                    Active = model.Active
-                };
+                var existingCustomer = bCustomer.GetCustomerById(id);
 
-                try
+                if (existingCustomer == null)
                 {
-                    bCustomer.UpdateCustomer(customer);
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Index");
                 }
-                catch (Exception ex)
-                {
-                    // Log ex (manejar la excepción adecuadamente)
-                    ModelState.AddModelError(string.Empty, "Error al editar el cliente.");
-                    return View(model);
-                }
+
+                existingCustomer.Name = customerModel.Name;
+                existingCustomer.Address = customerModel.Address;
+                existingCustomer.Phone = customerModel.Phone;
+                existingCustomer.Active = customerModel.Active;
+
+                bCustomer.UpdateCustomer(existingCustomer);
+
+                return RedirectToAction(nameof(Index));
             }
-
-            // Si el modelo no es válido, se retorna la vista con los datos del modelo
-            return View(model);
+            return View(customerModel);
         }
-
-
 
         // GET: CustomerController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var bCustomer = new BCustomer();
+            var customer = bCustomer.GetCustomerById(id);
+            if (customer == null)
+                return RedirectToAction("Index");
+            var customerModel = new CustomerModel
+            {
+                CustomerId = customer.CustomerId,
+                Name = customer.Name,
+                Address = customer.Address,
+                Phone = customer.Phone,
+                Active = customer.Active
+            };
+
+            return View(customerModel);
         }
 
         // POST: CustomerController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult DeleteConfirmed(int customerId)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            BCustomer bCustomer = new BCustomer();
+            bCustomer.DeleteCustomer(customerId);
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
